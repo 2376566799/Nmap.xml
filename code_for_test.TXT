@@ -1,0 +1,98 @@
+package OpenSourceNmap;
+import java.io.IOException;
+
+
+import java.net.InetAddress;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
+
+public class Test {
+	public static void main(String[] args) throws  IOException, ParserConfigurationException, SAXException, InterruptedException {
+		
+		
+	    InetAddress getAddress = InetAddress.getLocalHost();
+	    //获取本机的ip地址
+	    System.out.println(getAddress.getHostAddress());
+	    //打印ip地址
+	   
+		String cmd = "nmap -sS "+ getAddress.getHostAddress()+" -oX E://test.xml";
+		//创建字符串，用于储存将在cmd命令行中输出的命令
+		//该命令为调用nmap扫描本机ip，并将获取到的信息打印并保存到E盘下新建的text.xml文件中
+		String result = CmdUtil.excuteCMDCommand(cmd);
+		//在cmd中执行之前的命令，并将运行后的结果保存到名为result的字符串之中
+		System.out.println(result);
+		//将在cmd命令行中得到的运行结果打印出来（通过result字符串实现）
+		
+
+		DocumentBuilderFactory xmlToRead = DocumentBuilderFactory.newInstance();
+		//调用 DocumentBuilderFactory.newInstance() 方法得到创建 DOM 解析器的工厂
+		            DocumentBuilder db = xmlToRead.newDocumentBuilder();
+		            //调用工厂对象的 newDocumentBuilder方法得到 DOM 解析器对象
+		            Document document = db.parse("E://test.xml");
+		            //确定要读取的文件位置，这里为刚刚在c盘目录下生成的text.xml
+		            
+		            NodeList nodeList_port = document.getElementsByTagName("port");
+		            //通过节点名称获取一个节点列表，这里寻找的是“port”端口节点列表
+		            NodeList nodeList_state = document.getElementsByTagName("state");
+		            //通过节点名称获取一个节点列表，这里寻找的是“state”状态节点列表
+		            NodeList nodeList_service = document.getElementsByTagName("service");
+		            //通过节点名称获取一个节点列表，这里寻找的是“service”服务节点列表
+		            
+		            
+		            for(int i=0;i<nodeList_port.getLength();i++){
+		            //创建循环，遍历“port”端口节点列表，因为端口、服务、协议是一一对应的关系，所以外层循环次数一致，均为port节点列表长度
+		            Node node_port = nodeList_port.item(i);
+		            //创建节点用于存储port中的内容
+		            NamedNodeMap attrs_port = node_port.getAttributes();
+		            //创建port节点特性集合		   		            
+		            for(int j=0;j<attrs_port.getLength();j++){
+		            	//遍历port节点下所有的属性
+		            	String name_port = attrs_port.item(j).getNodeName();
+		            	//将获取的属性名称存在name_port字符串之中
+		            	 String context_port = attrs_port.item(j).getNodeValue();
+		            	//将获取的属性内容存在context_port字符串之中
+		            	 String Attribut_port = name_port+"="+context_port+"\t";
+		            	 //拼合属性名称和字符串，并保存至Attribut_port字符串之中
+		            	System.out.print(Attribut_port);
+		            	//输出保存了属性名称和内容的字符串
+		            }
+		            
+		            //state 	            
+		            Node node_state = nodeList_state.item(i);
+		            //创建节点用于存储state中的内容
+		            NamedNodeMap attrs_state = node_state.getAttributes();		
+		           //创建state节点特性集合	
+		            String name_state = attrs_state.item(2).getNodeName();
+		            //将获取的属性名称存在name_state字符串之中,这里只需要获取state节点下的第三个属性，因此为.item(2)
+		            String context_state = attrs_state.item(2).getNodeValue();
+	            	//将获取的属性内容存在context_state字符串之中，这里只需要获取state节点下的第三个属性，因此为.item(2)
+		            String Attribut_state = name_state+"="+context_state+"\t";
+		            //拼合属性名称和字符串，并保存至Attribut_state字符串之中
+		            System.out.print(Attribut_state);	
+		           //输出保存了属性名称和内容的字符串
+		            
+		            //service		            
+		            Node node_service = nodeList_service.item(i);
+		            //创建节点用于存储service中的内容
+		            NamedNodeMap attrs_service = node_service.getAttributes();	
+		            //创建service节点特性集合	
+		            String context_service = attrs_service.item(2).getNodeValue();
+		            //将获取的属性内容存在context_service字符串之中
+		            String Attribut_service = node_service.getNodeName()+"="+context_service+"\t";		
+		            //拼合属性名称和字符串，并保存至Attribut_service字符串之中，这里没有采用该属性的名称是因为该名称不如“service”更加直观、准确
+		            System.out.print(Attribut_service);		     
+		          //输出保存了属性名称和内容的字符串
+		            System.out.println();
+		          
+		            }
+    
+	}	
+}
